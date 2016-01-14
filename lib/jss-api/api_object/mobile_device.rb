@@ -148,10 +148,16 @@ module JSS
     ### See also {#blank_push}, {#update_inventory}, {#device_lock},
     ### {#erase_device}, {#clear_passcode}, and {#unmanage_device}
     ###
-    def self.send_mdm_command(dev,command)
+    def self.send_mdm_command(dev,command,*args)
 
       raise JSS::NoSuchItemError, "Unknown command '#{command}'" unless MOBILE_DEV_MDM_COMMANDS.keys.include? command
-      command_xml ="#{JSS::APIConnection::XML_HEADER}<mobile_device><command>#{MOBILE_DEV_MDM_COMMANDS[command]}</command></mobile_device>"
+      
+      command_xml ="#{JSS::APIConnection::XML_HEADER}<mobile_device><command>#{MOBILE_DEV_MDM_COMMANDS[command]}</command>"
+      if !args.nil? && args.length == 1
+        # there is a passcode
+        comannd_xml << "<passCode>123456</passCode>"
+      end
+      command_xml << "</mobile_device>"
       the_id = nil
       self.all_managed.each do |mmd|
         if [mmd[:id], mmd[:name], mmd[:serial_number], mmd[:phone_number], mmd[:udid], mmd[:wifi_mac_address]].include? dev
